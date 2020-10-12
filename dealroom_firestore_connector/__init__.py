@@ -17,6 +17,7 @@ def new_connection(project: str, credentials_path: str = None):
         [object]: Firestore db instance
     """
     try:
+        cred = None
         # Use a file service account otherwise trust the default GOOGLE_APPLICATION_CREDENTIALS env var.
         if credentials_path:
             cred = credentials.Certificate(credentials_path)
