@@ -11,7 +11,7 @@ from firebase_admin import credentials, firestore
 EXCEPTION_SLEEP_TIME = 5
 
 
-def new_connection(credentials_path):
+def new_connection(project_id: str, credentials_path: str = None):
     """Start a new connection with Firestore.
     Args:
         credentials_path (str): path to credentials json file
@@ -19,11 +19,14 @@ def new_connection(credentials_path):
         [object]: Firestore db instance
     """
     try:
-        # Use a service account
-        cred = credentials.Certificate(credentials_path)
-        firebase_admin.initialize_app(cred)
+        # Use a file service account otherwise trust the default GOOGLE_APPLICATION_CREDENTIALS env var.
+        if credentials_path:
+            cred = credentials.Certificate(credentials_path)
+
+        firebase_admin.initialize_app(cred, options={"project_id": project_id})
 
         db = firestore.client()
+
         return db
     except Exception as identifier:
         __log_exception(5, credentials_path, identifier, True)

@@ -131,3 +131,8 @@ dmypy.json
 
 # VS Code
 .vscode
+
+# GCP IAM credentials
+cred.json
+credentials.json
+keyfile.json
