@@ -155,3 +155,6 @@ def __log_exception(exception_code, ref, identifier, was_retried=False):
         )
     else:
         logging.error("[Error code %d] %s Retrying..." % (exception_code, message))
+
+
+SERVER_TIMESTAMP = firestore.SERVER_TIMESTAMP
