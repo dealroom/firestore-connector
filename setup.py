@@ -5,7 +5,7 @@ with open("README.md", "r") as fh:
     long_description = fh.read()
 
 setuptools.setup(
-    name="firestore-connector-dealroomco",  # Replace with your own username
+    name="dealroom-firestore-connector",  # Replace with your own username
     version="0.0.1",
     author="Dealroom.co",
     author_email="data@dealroom.co",
