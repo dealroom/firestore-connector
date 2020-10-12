@@ -1,5 +1,3 @@
-#!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 """ Firestore connector for exception handling with Dealroom data"""
 import logging
 from time import sleep
@@ -11,7 +9,7 @@ from firebase_admin import credentials, firestore
 EXCEPTION_SLEEP_TIME = 5
 
 
-def new_connection(project_id: str, credentials_path: str = None):
+def new_connection(project: str, credentials_path: str = None):
     """Start a new connection with Firestore.
     Args:
         credentials_path (str): path to credentials json file
@@ -23,7 +21,7 @@ def new_connection(project_id: str, credentials_path: str = None):
         if credentials_path:
             cred = credentials.Certificate(credentials_path)
 
-        firebase_admin.initialize_app(cred, options={"project_id": project_id})
+        firebase_admin.initialize_app(cred, options={"project_id": project})
 
         db = firestore.client()
 
@@ -158,6 +156,3 @@ def __log_exception(exception_code, ref, identifier, was_retried=False):
         )
     else:
         logging.error("[Error code %d] %s Retrying..." % (exception_code, message))
-
-
-SERVER_TIMESTAMP = firestore.SERVER_TIMESTAMP
