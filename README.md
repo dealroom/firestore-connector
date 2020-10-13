@@ -21,3 +21,8 @@ fc.set(doc_ref, payload)
 ```
 
 See [examples.py](examples.py) for more examples
+
+---
+
+## Contributing
+Every time a change is made we should bump up the version of the module at [setup.py](setup.py).
