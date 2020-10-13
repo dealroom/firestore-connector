@@ -1,9 +1,10 @@
 """ Firestore connector for exception handling with Dealroom data"""
 import logging
+import os
+import traceback
 from time import sleep
 
-import firebase_admin
-from firebase_admin import credentials, firestore
+from google.cloud import firestore
 
 # Time to sleep in seconds when a exception occurrs until retrying
 EXCEPTION_SLEEP_TIME = 5
@@ -11,25 +12,18 @@ EXCEPTION_SLEEP_TIME = 5
 
 def new_connection(project: str, credentials_path: str = None):
     """Start a new connection with Firestore.
-
     Args:
-        project (str): The project to be used for firestore.
-        credentials_path (str, optional): path to credentials json file. Defaults to None.
-
+        credentials_path (str): path to credentials json file
     Returns:
-        (object|int): Firestore db instance or -1 on error
+        [object]: Firestore db instance
     """
     try:
-        cred = None
-        # Use a file service account otherwise trust the default GOOGLE_APPLICATION_CREDENTIALS env var.
         if credentials_path:
-            cred = credentials.Certificate(credentials_path)
-
-        firebase_admin.initialize_app(cred, options={"project_id": project})
-
-        db = firestore.client()
-
-        return db
+            return firestore.Client.from_service_account_json(credentials_path)
+        elif os.getenv("GOOGLE_APPLICATION_CREDENTIALS"):
+            return firestore.Client(project=project)
+        else:
+            raise Exception("Please set 'GOOGLE_APPLICATION_CREDENTIALS' env var")
     except Exception as identifier:
         __log_exception(5, credentials_path, identifier, True)
         return -1

@@ -6,7 +6,7 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="dealroom-firestore-connector",  # Replace with your own username
-    version="0.0.1",
+    version="0.0.2",
     author="Dealroom.co",
     author_email="data@dealroom.co",
     description="A wrapper class for accessing Google Cloud Firestore.",
@@ -19,6 +19,6 @@ setuptools.setup(
         "License :: OSI Approved :: MIT License",
         "Operating System :: OS Independent",
     ],
-    install_requires=["firebase-admin"],
+    install_requires=["google-cloud-firestore"],
     python_requires=">=3.6",
 )
