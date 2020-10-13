@@ -19,3 +19,5 @@ payload = {}
 # Update a doc
 fc.set(doc_ref, payload)
 ```
+
+See [examples.py](examples.py) for more examples
