@@ -11,10 +11,13 @@ EXCEPTION_SLEEP_TIME = 5
 
 def new_connection(project: str, credentials_path: str = None):
     """Start a new connection with Firestore.
+
     Args:
-        credentials_path (str): path to credentials json file
+        project (str): The project to be used for firestore.
+        credentials_path (str, optional): path to credentials json file. Defaults to None.
+
     Returns:
-        [object]: Firestore db instance
+        (object|int): Firestore db instance or -1 on error
     """
     try:
         cred = None
