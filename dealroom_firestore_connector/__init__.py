@@ -78,7 +78,7 @@ def set(doc_ref, *args, **kwargs):
         sleep(EXCEPTION_SLEEP_TIME)
         try:
             # Retry
-            doc_ref.set(*args, **kwargs)
+            doc_ref.set(*args, **kwargs, merge=True)
             # Return success code 0
             return 0
         except Exception as identifier:
