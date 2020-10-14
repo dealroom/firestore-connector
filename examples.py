@@ -4,7 +4,7 @@ import dealroom_firestore_connector as fc
 
 # Connect to staging Firestore
 db = fc.new_connection(
-    project_id="sustained-hold-288413",
+    project="sustained-hold-288413",
     credentials_path="cred.json",
 )
 if db == -1:
