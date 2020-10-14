@@ -9,9 +9,13 @@ A wrapper class for accessing Google Cloud Firestore based on our business logic
 import dealroom_firestore_connector as fc
 
 # Equivalent to firestore.Client()
-db = fc.new_connection()
+db = fc.new_connection(project="...")
 
-doc_ref = db.collection('...').document('...').get()
+collection_ref = db.collection("...")
+doc_ref = collection_ref.document("...")
+
+# Get a doc
+doc = fc.get(doc_ref)
 
 # payload to update
 payload = {}
