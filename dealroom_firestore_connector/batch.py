@@ -23,7 +23,7 @@ class Batcher(firestore.WriteBatch):
         self.__total_writes = 0
 
     def __count_write(func):
-        """Decorator to be attached in write operations. It observes
+        """Decorator to be attached in write operations. Observes
         how many batches we are going to flush at once.
         """
 
