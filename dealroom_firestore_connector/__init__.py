@@ -4,9 +4,9 @@ import os
 import traceback
 from time import sleep
 
-import google
 from google.cloud import firestore
-from google.cloud.firestore import WriteBatch
+
+from batch import Batcher
 
 # Time to sleep in seconds when a exception occurrs until retrying
 EXCEPTION_SLEEP_TIME = 5
@@ -157,23 +157,3 @@ def __log_exception(exception_code, ref, identifier, was_retried=False):
         )
     else:
         logging.error("[Error code %d] %s Retrying..." % (exception_code, message))
-
-
-class Batcher(WriteBatch):
-    """Accumulate write operations to be sent in a batch.
-    This has the same set of methods for write operations that
-    :class:`~google.cloud.firestore.DocumentReference` does,
-    e.g. :meth:`~google.cloud.firestore.DocumentReference.create`.
-    Args:
-        client (:class:`~google.cloud.firestore.Client`):
-            The client that created this batch.
-    """
-
-    def set(self, doc_ref, *args, **kwargs):
-        """Creates a document in firestore or updates it if it already exists.
-        When the document exists it always updates the document and never overrides it.
-
-        See  :meth:`google.cloud.firestore.DocumentReference.set` for more details.
-        """
-        final_kwargs = {**kwargs, "merge": True}
-        return super().set(doc_ref, *args, **final_kwargs)
