@@ -5,6 +5,8 @@ A wrapper class for accessing Google Cloud Firestore based on our business logic
 `pip install -e git+https://github.com/dealroom/firestore-connector.git#egg=dealroom-firestore-connector`
 
 ## Usage
+
+### Simple
 ```python
 import dealroom_firestore_connector as fc
 
@@ -22,6 +24,35 @@ payload = {}
 
 # Update a doc
 fc.set(doc_ref, payload)
+```
+
+### Batched
+```python
+import dealroom_firestore_connector as fc
+
+# Equivalent to firestore.Client()
+db = fc.new_connection(project="...")
+
+collection_ref = db.collection("...")
+
+# -------
+# Option 1: Sequentially
+
+batch = fc.Batcher(db)
+# Writes/Deletes
+batch.set(collection_ref.document("doc1"), {"foo1": "bar1"})
+batch.set(collection_ref.document("doc2"), {"foo2": "bar2"})
+batch.update(collection_ref.document("doc3"), {"foo3": "bar3"})
+
+batch.commit()
+
+# -----
+# Option 2: Using context manager pattern
+
+with fc.Batcher(db) as batch:
+    batch.set(collection_ref.document("doc1"), {"foo1": "bar1"})
+    batch.set(collection_ref.document("doc2"), {"foo2": "bar2"})
+    batch.update(collection_ref.document("doc3"), {"foo3": "bar3"})
 ```
 
 See [examples.py](examples.py) for more examples
