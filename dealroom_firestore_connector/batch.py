@@ -1,8 +1,9 @@
-""" Firestore connector for exception handling with Dealroom data"""
 import functools
 
 from google.api_core.exceptions import InvalidArgument
 from google.cloud import firestore
+
+from status_codes import ERROR, SUCCESS
 
 
 class Batcher(firestore.WriteBatch):
@@ -21,6 +22,11 @@ class Batcher(firestore.WriteBatch):
     def __init__(self, client):
         super().__init__(client)
         self.__total_writes = 0
+
+    @property
+    def total_writes(self):
+        """The total writes for the current batch"""
+        return self.__total_writes
 
     def __count_write(func):
         """Decorator to be attached in write operations. Observes
@@ -65,3 +71,20 @@ class Batcher(firestore.WriteBatch):
     def update(self, doc_ref, *args, **kwargs):
         """See :meth:`google.cloud.firestore.base_batch.BaseWriteBatch.update` for details."""
         return super().update(doc_ref, *args, **kwargs)
+
+    def commit(self, retry=True):
+        """Commit the changes accumulated in the current batch but can retry on failure.
+        See :meth:`google.cloud.firestore.base_batch.BaseWriteBatch.commit` for details.
+        """
+        try:
+            super().commit()
+
+            # Reset counter after a succesfull commit, to keep monitoring.
+            self.__total_writes = 0
+
+            return SUCCESS
+        except:
+            if retry:
+                return self.commit(retry=False)
+            else:
+                return ERROR
