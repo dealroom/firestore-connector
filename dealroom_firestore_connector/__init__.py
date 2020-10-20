@@ -23,10 +23,8 @@ def new_connection(project: str, credentials_path: str = None):
     try:
         if credentials_path:
             return firestore.Client.from_service_account_json(credentials_path)
-        elif os.getenv("GOOGLE_APPLICATION_CREDENTIALS"):
-            return firestore.Client(project=project)
         else:
-            raise Exception("Please set 'GOOGLE_APPLICATION_CREDENTIALS' env var")
+            return firestore.Client(project=project)
     except Exception as identifier:
         __log_exception(5, credentials_path, identifier, True)
         return -1
