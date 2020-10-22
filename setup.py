@@ -1,4 +1,3 @@
-# Build the distributed package
 import setuptools
 
 with open("README.md", "r") as fh:
@@ -6,7 +5,7 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="dealroom-firestore-connector",  # Replace with your own username
-    version="0.0.4",
+    version="0.0.5",
     author="Dealroom.co",
     author_email="data@dealroom.co",
     description="A wrapper class for accessing Google Cloud Firestore.",

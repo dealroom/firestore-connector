@@ -6,6 +6,8 @@ from time import sleep
 
 from google.cloud import firestore
 
+from batch import Batcher
+
 # Time to sleep in seconds when a exception occurrs until retrying
 EXCEPTION_SLEEP_TIME = 5
 
