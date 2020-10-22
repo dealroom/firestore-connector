@@ -44,7 +44,10 @@ batch.set(collection_ref.document("doc1"), {"foo1": "bar1"})
 batch.set(collection_ref.document("doc2"), {"foo2": "bar2"})
 batch.update(collection_ref.document("doc3"), {"foo3": "bar3"})
 
-batch.commit()
+if status < 0:
+    print("Failed to commit changes")
+else:
+    print("Successful commited changes")
 
 # -----
 # Option 2: Using context manager pattern
