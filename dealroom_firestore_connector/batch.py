@@ -3,7 +3,7 @@ import functools
 from google.api_core.exceptions import InvalidArgument
 from google.cloud import firestore
 
-from status_codes import ERROR, SUCCESS
+from .status_codes import ERROR, SUCCESS
 
 
 class Batcher(firestore.WriteBatch):
