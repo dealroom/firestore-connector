@@ -8,6 +8,7 @@ from google.cloud import firestore
 
 from .batch import Batcher
 from .helpers import error_logger
+from .status_codes import ERROR, SUCCESS
 
 # Time to sleep in seconds when a exception occurrs until retrying
 EXCEPTION_SLEEP_TIME = 5
@@ -28,7 +29,7 @@ def new_connection(project: str, credentials_path: str = None):
             return firestore.Client(project=project)
     except Exception as identifier:
         __log_exception(5, credentials_path, identifier, True)
-        return -1
+        return ERROR
 
 
 def get(doc_ref, *args, **kwargs):
@@ -52,7 +53,7 @@ def get(doc_ref, *args, **kwargs):
         except Exception as identifier:
             # log error
             __log_exception(3, doc_ref, identifier, True)
-            return -1
+            return ERROR
 
 
 def set(doc_ref, *args, **kwargs):
@@ -65,8 +66,7 @@ def set(doc_ref, *args, **kwargs):
     """
     try:
         doc_ref.set(*args, **kwargs, merge=True)
-        # Return success code 0
-        return 0
+        return SUCCESS
     except Exception as identifier:
         # log error
         __log_exception(4, doc_ref, identifier)
@@ -75,12 +75,11 @@ def set(doc_ref, *args, **kwargs):
         try:
             # Retry
             doc_ref.set(*args, **kwargs, merge=True)
-            # Return success code 0
-            return 0
+            return SUCCESS
         except Exception as identifier:
             # log error
             __log_exception(4, doc_ref, identifier, True)
-            return -1
+            return ERROR
 
 
 def update(doc_ref, *args, **kwargs):
@@ -93,8 +92,7 @@ def update(doc_ref, *args, **kwargs):
     """
     try:
         doc_ref.update(*args, **kwargs)
-        # Return success code 0
-        return 0
+        return SUCCESS
     except Exception as identifier:
         # log error
         __log_exception(2, doc_ref, identifier)
@@ -103,12 +101,11 @@ def update(doc_ref, *args, **kwargs):
         try:
             # Retry
             doc_ref.update(*args, **kwargs)
-            # Return success code 0
-            return 0
+            return SUCCESS
         except Exception as identifier:
             # log error
             __log_exception(2, doc_ref, identifier, True)
-            return -1
+            return ERROR
 
 
 def stream(collection_ref, *args, **kwargs):
@@ -132,7 +129,7 @@ def stream(collection_ref, *args, **kwargs):
         except Exception as identifier:
             # log error
             __log_exception(1, collection_ref, identifier, True)
-            return -1
+            return ERROR
 
 
 def __log_exception(error_code, ref, identifier, was_retried=False):
