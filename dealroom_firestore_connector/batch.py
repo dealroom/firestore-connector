@@ -1,8 +1,11 @@
 import functools
+import logging
+import traceback
 
 from google.api_core.exceptions import InvalidArgument
 from google.cloud import firestore
 
+from .helpers import error_logger
 from .status_codes import ERROR, SUCCESS
 
 
@@ -83,8 +86,9 @@ class Batcher(firestore.WriteBatch):
             self.__total_writes = 0
 
             return SUCCESS
-        except:
+        except Exception as exc:
             if retry:
                 return self.commit(retry=False)
             else:
+                error_logger("Failed to batch commit.")
                 return ERROR

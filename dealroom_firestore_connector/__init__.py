@@ -7,6 +7,7 @@ from time import sleep
 from google.cloud import firestore
 
 from .batch import Batcher
+from .helpers import error_logger
 from .status_codes import ERROR, SUCCESS
 
 # Time to sleep in seconds when a exception occurrs until retrying
@@ -131,24 +132,21 @@ def stream(collection_ref, *args, **kwargs):
             return ERROR
 
 
-def __log_exception(exception_code, ref, identifier, was_retried=False):
+def __log_exception(error_code, ref, identifier, was_retried=False):
     message = "Unknown error"
-    if exception_code == 1:
+    if error_code == 1:
         message = "An error occurred retrieving stream for collection %s." % (ref)
-    elif exception_code == 2:
+    elif error_code == 2:
         message = "An error occurred updating document %s." % (ref)
-    elif exception_code == 3:
+    elif error_code == 3:
         message = "An error occurred getting document %s." % (ref)
-    elif exception_code == 4:
+    elif error_code == 4:
         message = "An error occurred creating document %s." % (ref)
-    elif exception_code == 5:
+    elif error_code == 5:
         message = "Error connecting with db with credentials file %s." % (ref)
 
     if was_retried:
         # TODO save to csv or json
-        logging.error(
-            "[Error code %d] %s Error trace: %s."
-            % (exception_code, message, identifier)
-        )
+        error_logger(error_code, message)
     else:
-        logging.error("[Error code %d] %s Retrying..." % (exception_code, message))
+        logging.error("[Error code %d] %s Retrying..." % (error_code, message))
