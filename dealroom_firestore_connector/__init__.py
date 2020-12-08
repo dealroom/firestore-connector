@@ -148,7 +148,10 @@ def collection_exists(collection_ref: CollectionReference):
         >>> print(fc.collection_exists(col_ref))
         False
     """
-    docs = collection_ref.limit(1).get()
+    docs = get(collection_ref.limit(1))
+    
+    if docs == -1:
+        return logging.error("Couldn't get collection_ref")
     return len(docs) > 0
 
 
