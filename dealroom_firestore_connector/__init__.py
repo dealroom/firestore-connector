@@ -5,11 +5,18 @@ import traceback
 from time import sleep
 
 from google.cloud import firestore
+from google.cloud.firestore_v1.collection import CollectionReference
 
-from .batch import Batcher
-from .helpers import error_logger
-from .status_codes import ERROR, SUCCESS
-
+try:
+    from .batch import Batcher
+    from .helpers import error_logger
+    from .status_codes import ERROR, SUCCESS
+    
+except ImportError:
+    # Run from tests
+    from batch import Batcher
+    from helpers import error_logger
+    from status_codes import ERROR, SUCCESS
 # Time to sleep in seconds when a exception occurrs until retrying
 EXCEPTION_SLEEP_TIME = 5
 
@@ -130,6 +137,25 @@ def stream(collection_ref, *args, **kwargs):
             # log error
             __log_exception(1, collection_ref, identifier, True)
             return ERROR
+
+
+
+def collection_exists(collection_ref: CollectionReference):
+    """A helper method to check whether a collection exists
+
+    Args:
+        collection_ref (CollectionReference): The reference object to check if exists
+
+    Returns:
+        bool: True if it exists, False otherwise.
+    Examples:
+        >>> db = new_connection(project=FIRESTORE_PROJECT_ID)
+        >>> col_ref = db.collection("MY_COLLECTION")
+        >>> print(fc.collection_exists(col_ref))
+        False
+    """
+    docs = collection_ref.limit(1).get()
+    return len(docs) > 0
 
 
 def __log_exception(error_code, ref, identifier, was_retried=False):
