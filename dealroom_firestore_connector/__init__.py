@@ -151,7 +151,8 @@ def collection_exists(collection_ref: CollectionReference):
     docs = get(collection_ref.limit(1))
     
     if docs == -1:
-        return logging.error("Couldn't get collection_ref")
+        logging.error("Couldn't get collection_ref. Please check the logs above for possible errors.")
+        return False
     return len(docs) > 0
 
 
