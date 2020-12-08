@@ -7,16 +7,10 @@ from time import sleep
 from google.cloud import firestore
 from google.cloud.firestore_v1.collection import CollectionReference
 
-try:
-    from .batch import Batcher
-    from .helpers import error_logger
-    from .status_codes import ERROR, SUCCESS
-    
-except ImportError:
-    # Run from tests
-    from batch import Batcher
-    from helpers import error_logger
-    from status_codes import ERROR, SUCCESS
+from .batch import Batcher
+from .helpers import error_logger
+from .status_codes import ERROR, SUCCESS
+
 # Time to sleep in seconds when a exception occurrs until retrying
 EXCEPTION_SLEEP_TIME = 5
 

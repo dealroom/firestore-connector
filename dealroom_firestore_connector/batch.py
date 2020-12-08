@@ -5,13 +5,8 @@ import traceback
 from google.api_core.exceptions import InvalidArgument
 from google.cloud import firestore
 
-try:
-    from .helpers import error_logger
-    from .status_codes import ERROR, SUCCESS
-except ImportError:
-    # Run from tests
-    from helpers import error_logger
-    from status_codes import ERROR, SUCCESS
+from .helpers import error_logger
+from .status_codes import ERROR, SUCCESS
 
 
 class Batcher(firestore.WriteBatch):
