@@ -11,7 +11,7 @@ setuptools.setup(
     description="A wrapper class for accessing Google Cloud Firestore.",
     long_description=long_description,
     long_description_content_type="text/markdown",
-    url="https://github.com/dealroom/firestore-connector",
+    url="https://github.com/dealroom/data-firestore-connector",
     packages=setuptools.find_packages(),
     classifiers=[
         "Programming Language :: Python :: 3",
