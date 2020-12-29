@@ -4,7 +4,7 @@ import traceback
 
 def error_logger(message, error_code=0):
     """Logs formatted error messages on the stderr file."""
+    formatted_exc = traceback.format_exc()
     logging.error(
-        "Error trace: %s\n[Error code %d] %s"
-        % (traceback.format_exc(), error_code, message)
+        f"Error trace: {formatted_exc}\n[Error code {error_code}] {message}"
     )

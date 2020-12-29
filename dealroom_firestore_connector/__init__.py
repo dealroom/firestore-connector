@@ -149,7 +149,7 @@ def collection_exists(collection_ref: CollectionReference):
         False
     """
     docs = get(collection_ref.limit(1))
-    
+
     if docs == -1:
         logging.error("Couldn't get collection_ref. Please check the logs above for possible errors.")
         return False
@@ -159,18 +159,18 @@ def collection_exists(collection_ref: CollectionReference):
 def __log_exception(error_code, ref, identifier, was_retried=False):
     message = "Unknown error"
     if error_code == 1:
-        message = "An error occurred retrieving stream for collection %s." % (ref)
+        message = f"An error occurred retrieving stream for collection {ref}."
     elif error_code == 2:
-        message = "An error occurred updating document %s." % (ref)
+        message = f"An error occurred updating document {ref}."
     elif error_code == 3:
-        message = "An error occurred getting document %s." % (ref)
+        message = f"An error occurred getting document {ref}."
     elif error_code == 4:
-        message = "An error occurred creating document %s." % (ref)
+        message = f"An error occurred creating document {ref}."
     elif error_code == 5:
-        message = "Error connecting with db with credentials file %s." % (ref)
+        message = f"Error connecting with db with credentials file {ref}."
 
     if was_retried:
         # TODO save to csv or json
-        error_logger(error_code, message)
+        error_logger(message, error_code)
     else:
-        logging.error("[Error code %d] %s Retrying..." % (error_code, message))
+        logging.error(f"[Error code {error_code}] {message} Retrying...")
