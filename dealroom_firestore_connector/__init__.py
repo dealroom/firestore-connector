@@ -180,7 +180,7 @@ def get_history_doc_refs(
     collection_path = "history"
     collection_ref = db.collection(collection_path)
 
-    if finalurl_or_dealroomid.isnumeric():
+    if str(finalurl_or_dealroomid).isnumeric():
         query_params = ["dealroom_id", "==", int(finalurl_or_dealroomid)]
     else:
         query_params = ["final_url", "==", finalurl_or_dealroomid]
