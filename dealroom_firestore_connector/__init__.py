@@ -7,6 +7,7 @@ from typing import Tuple
 
 from google.cloud import firestore
 from google.cloud.firestore_v1.collection import CollectionReference
+from google.cloud.firestore_v1.document import DocumentReference
 
 from .batch import Batcher
 from .helpers import error_logger
@@ -155,9 +156,6 @@ def collection_exists(collection_ref: CollectionReference):
         logging.error("Couldn't get collection_ref. Please check the logs above for possible errors.")
         return False
     return len(docs) > 0
-
-
-from google.cloud.firestore_v1.document import DocumentReference
 
 
 def get_history_doc_refs(
