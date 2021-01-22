@@ -3,6 +3,7 @@ import logging
 import os
 import traceback
 from time import sleep
+from typing import List
 
 from google.cloud import firestore
 from google.cloud.firestore_v1.collection import CollectionReference
@@ -162,7 +163,7 @@ from google.cloud.firestore_v1.document import DocumentReference
 def get_history_doc_refs(
     db: firestore.Client,
     finalurl_or_dealroomid: str
-) -> DocumentReference:
+) -> Tuple[DocumentReference]:
     """Returns a DocumentReference based on the final_url field or dealroom_id
     field.
 
