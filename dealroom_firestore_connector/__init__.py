@@ -3,7 +3,7 @@ import logging
 import os
 import traceback
 from time import sleep
-from typing import Tuple
+from typing import Tuple, Union
 
 from google.cloud import firestore
 from google.cloud.firestore_v1.collection import CollectionReference
@@ -161,7 +161,7 @@ def collection_exists(collection_ref: CollectionReference):
 def get_history_doc_refs(
     db: firestore.Client,
     finalurl_or_dealroomid: str
-) -> Tuple[DocumentReference]:
+) -> Union[Tuple[DocumentReference], int]:
     """Returns a DocumentReference based on the final_url field or dealroom_id
     field.
 
@@ -189,7 +189,7 @@ def get_history_doc_refs(
     docs = stream(query)
     if docs == -1:
         logging.error("Couldn't stream query.")
-        return False
+        return ERROR
 
     return tuple(doc.reference for doc in docs)
 
