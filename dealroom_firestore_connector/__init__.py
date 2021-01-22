@@ -156,6 +156,42 @@ def collection_exists(collection_ref: CollectionReference):
     return len(docs) > 0
 
 
+from google.cloud.firestore_v1.document import DocumentReference
+
+
+def get_history_doc_refs(
+    db: firestore.Client,
+    finalurl_or_dealroomid: str
+) -> DocumentReference:
+    """Returns a DocumentReference based on the final_url field or dealroom_id
+    field.
+
+    Args:
+
+    Returns:
+
+    Examples:
+        >>> db = new_connection(project=FIRESTORE_PROJECT_ID)
+        >>> doc_refs = get_history_refs(db, "dealroom.co")
+    """
+
+    collection_path = "history"
+    collection_ref = db.collection(collection_path)
+
+    if finalurl_or_dealroomid.isnumeric():
+        query_params = ["dealroom_id", "==", int(finalurl_or_dealroomid)]
+    else:
+        query_params = ["final_url", "==", finalurl_or_dealroomid]
+
+    query = collection_ref.where(*query_params)
+    docs = stream(query)
+    if docs == -1:
+        logging.error("Couldn't stream query.")
+        return False
+
+    return tuple(doc.reference for doc in docs)
+
+
 def __log_exception(error_code, ref, identifier, was_retried=False):
     message = "Unknown error"
     if error_code == 1:
