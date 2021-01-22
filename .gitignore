@@ -136,3 +136,4 @@ dmypy.json
 cred.json
 credentials.json
 keyfile.json
+.DS_Store
