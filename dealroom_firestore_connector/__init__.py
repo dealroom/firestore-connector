@@ -168,8 +168,11 @@ def get_history_doc_refs(
     field.
 
     Args:
+        db (firestore.Client): the client that will perform the operations.
+        finalurl_or_dealroomid (str): either a domain or a dealroom ID. Query documents that match this parameter.
 
     Returns:
+        Tuple[DocumentReference]: a sequence of document references matching the input parameter.
 
     Examples:
         >>> db = new_connection(project=FIRESTORE_PROJECT_ID)
