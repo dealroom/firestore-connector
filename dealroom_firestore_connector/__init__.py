@@ -187,7 +187,7 @@ def get_history_doc_refs(
 
     query = collection_ref.where(*query_params)
     docs = stream(query)
-    if docs == -1:
+    if docs == ERROR:
         logging.error("Couldn't stream query.")
         return ERROR
 
