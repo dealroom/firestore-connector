@@ -3,7 +3,7 @@ import logging
 import os
 import traceback
 from time import sleep
-from typing import List
+from typing import Tuple
 
 from google.cloud import firestore
 from google.cloud.firestore_v1.collection import CollectionReference
