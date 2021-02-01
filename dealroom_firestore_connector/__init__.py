@@ -5,6 +5,7 @@ import traceback
 from time import sleep
 from typing import Tuple, Union
 
+from dealroom_urlextract import extract
 from google.cloud import firestore
 from google.cloud.firestore_v1.collection import CollectionReference
 from google.cloud.firestore_v1.document import DocumentReference
@@ -157,6 +158,7 @@ def collection_exists(collection_ref: CollectionReference):
         return False
     return len(docs) > 0
 
+HISTORY_COLLECTION_PATH = "history"
 
 def get_history_doc_refs(
     db: firestore.Client,
@@ -177,13 +179,14 @@ def get_history_doc_refs(
         >>> doc_refs = get_history_refs(db, "dealroom.co")
     """
 
-    collection_path = "history"
-    collection_ref = db.collection(collection_path)
+    collection_ref = db.collection(HISTORY_COLLECTION_PATH)
 
     if str(finalurl_or_dealroomid).isnumeric():
         query_params = ["dealroom_id", "==", int(finalurl_or_dealroomid)]
     else:
-        query_params = ["final_url", "==", finalurl_or_dealroomid]
+        # Extract the final_url in the required format, so we can query the collection with the exact match.
+        final_url = extract(finalurl_or_dealroomid)
+        query_params = ["final_url", "==", final_url]
 
     query = collection_ref.where(*query_params)
     docs = stream(query)
@@ -192,6 +195,92 @@ def get_history_doc_refs(
         return ERROR
 
     return tuple(doc.reference for doc in docs)
+
+
+def _validate_dealroomid(dealroom_id: Union[str, int]):
+    if not str(dealroom_id).isnumeric() and dealroom_id != -1:
+        raise ValueError("'dealroom_id' must be an integer")
+
+def _validate_final_url(final_url: str):
+    # Extract method has internally validation rules. Check here:
+    # https://github.com/dealroom/data-urlextract/blob/main/dealroom_urlextract/__init__.py#L33-L35
+    try:
+        extract(final_url)
+    except:
+        raise ValueError("'final_url' must have a url-like format")
+
+def _validate_new_history_doc_payload(payload: dict):
+    """Validate the required fields in the payload when creating a new document"""
+
+    if "final_url" not in payload:
+        raise KeyError("'final_url' must be present payload")
+    
+    _validate_final_url(payload["final_url"])
+    
+    if "dealroom_id" not in payload:
+        raise KeyError("'dealroom_id' must be present payload")
+
+    _validate_dealroomid(payload["dealroom_id"])
+
+def _validate_update_history_doc_payload(payload: dict):
+    """Validate the required fields in the payload when updating"""
+
+    if "final_url" in payload:
+        _validate_final_url(payload["final_url"])
+    
+    if "dealroom_id" in payload:
+        _validate_dealroomid(payload["dealroom_id"])
+
+
+def set_history_doc_refs(
+    db: firestore.Client,
+    payload: dict
+) -> None:
+    """Updates or creates a document in history collection
+
+    Args:
+        db (firestore.Client): the client that will perform the operations.
+        payload (dict): The actual data that the newly created will have or the fields to update.
+
+    Examples:
+        >>> db = new_connection(project=FIRESTORE_PROJECT_ID)
+        >>> set_history_refs(db, {"final_url": "dealroom.co", "dealroom_id": "1111111")
+    """
+
+    history_col = db.collection(HISTORY_COLLECTION_PATH)
+
+    finalurl_or_dealroomid = payload.get("final_url") or payload.get("dealroom_id")
+    if not finalurl_or_dealroomid:
+        raise KeyError("At least one of 'final_url' or 'dealroom_id' need to be defined in the 'payload' param")
+
+    # Since we validated the payload, we know that the final_url is presented.
+    history_refs = get_history_doc_refs(db, finalurl_or_dealroomid)
+    
+    _payload = { **payload }
+
+    # If there is not available documents in history, then create a new one
+    if len(history_refs) == 0:
+        # Add any default values to the payload
+        _payload = {
+            "dealroom_id": -1,
+            **payload
+        }
+        # Validate that the new document will have the minimum required fields
+        _validate_new_history_doc_payload(_payload)
+        # Create a list so the next iteration works for a new history document as well.
+        history_refs = [history_col.document()]
+
+    for history_ref in history_refs:
+        _validate_update_history_doc_payload(_payload)
+
+        res = set(history_ref, _payload)
+
+        if res == -1:
+            raise Exception(
+                f"Couldn't `set` document {domain}. Please check logs above."
+            )
+
+
 
 
 def __log_exception(error_code, ref, identifier, was_retried=False):
