@@ -1,7 +1,10 @@
 appdirs==1.4.4
+attrs==20.3.0
 cachetools==4.1.1
 certifi==2020.6.20
 chardet==3.0.4
+-e git+https://github.com/dealroom/data-urlextract.git@2aaec2ad6a040f154d9a101cc27dbe68aa8bf3b9#egg=dealroom_urlextract
+filelock==3.0.12
 google-api-core==1.22.4
 google-auth==1.22.1
 google-cloud-core==1.4.3
@@ -9,16 +12,24 @@ google-cloud-firestore==1.9.0
 googleapis-common-protos==1.52.0
 grpcio==1.32.0
 idna==2.10
+iniconfig==1.1.1
 mypy-extensions==0.4.3
+packaging==20.7
 pathspec==0.8.0
+pluggy==0.13.1
 protobuf==3.13.0
+py==1.9.0
 pyasn1==0.4.8
 pyasn1-modules==0.2.8
+pyparsing==2.4.7
+pytest==6.1.2
 pytz==2020.1
 regex==2020.10.11
 requests==2.24.0
+requests-file==1.5.1
 rsa==4.6
 six==1.15.0
+tldextract==3.1.0
 toml==0.10.1
 typed-ast==1.4.1
 typing-extensions==3.7.4.3
