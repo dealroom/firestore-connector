@@ -241,6 +241,7 @@ def set_history_doc_refs(
     Args:
         db (firestore.Client): the client that will perform the operations.
         payload (dict): The actual data that the newly created will have or the fields to update.
+                        'final_url' or 'dealroom_id' is required to find the correct document to set.
 
     Examples:
         >>> db = new_connection(project=FIRESTORE_PROJECT_ID)
