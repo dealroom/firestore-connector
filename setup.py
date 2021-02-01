@@ -19,7 +19,8 @@ setuptools.setup(
         "Operating System :: OS Independent",
     ],
     install_requires=[
-        "google-cloud-firestore"
+        "google-cloud-firestore",
+        "dealroom_urlextract @ https://github.com/dealroom/data-firestore-connector/tree/set-history-url#egg=dealroom_urlextract",
     ],
     dependency_links=[
         "https://github.com/dealroom/data-firestore-connector/tree/set-history-url#egg=dealroom_urlextract"
