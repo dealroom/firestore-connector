@@ -2,7 +2,7 @@
 A wrapper class for accessing Google Cloud Firestore based on our business logic
 
 ## Install
-**pip**: 
+**pip**:  
 `pip install -e git+https://github.com/dealroom/data-firestore-connector.git#egg=dealroom-firestore-connector`  
 **poetry**:  
 `poetry add "git+https://github.com/dealroom/data-firestore-connector#main"`
