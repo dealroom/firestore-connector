@@ -1,1 +1,3 @@
 _extends: data-github-config
+repository:
+  private: false
