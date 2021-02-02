@@ -291,7 +291,7 @@ def set_history_doc_refs(
             return ERROR
 
         history_ref = history_refs[0]
-    # If more than one document was found then it's an error.
+    # If more than one document were found then it's an error.
     else:
          # TODO: Raise a Custom Exception (DuplicateDocumentsException) with the same message when we replace ERROR constant with actual exceptions
         logging.error("Found more than one documents to update for this payload")
