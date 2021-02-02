@@ -185,7 +185,11 @@ def get_history_doc_refs(
         query_params = ["dealroom_id", "==", int(finalurl_or_dealroomid)]
     else:
         # Extract the final_url in the required format, so we can query the collection with the exact match.
-        final_url = extract(finalurl_or_dealroomid)
+        try:
+            final_url = extract(finalurl_or_dealroomid)
+        except:
+            logging.error(f"'final_url': {finalurl_or_dealroomid} is not a valid url")
+            return ERROR
         query_params = ["final_url", "==", final_url]
 
     query = collection_ref.where(*query_params)
@@ -252,34 +256,55 @@ def set_history_doc_refs(
 
     finalurl_or_dealroomid = payload.get("final_url") or payload.get("dealroom_id")
     if not finalurl_or_dealroomid:
-        raise KeyError("At least one of 'final_url' or 'dealroom_id' need to be defined in the 'payload' param")
+        # TODO: Raise a KeyError with the same message when we replace ERROR constant with actual exceptions
+        logging.error("At least one of 'final_url' or 'dealroom_id' need to be defined in the 'payload' param")
+        return ERROR
+        
 
-    # Since we validated the payload, we know that the final_url is presented.
-    history_refs = get_history_doc_refs(db, finalurl_or_dealroomid)
     
     _payload = { **payload }
 
-    # If there is not available documents in history, then create a new one
-    if len(history_refs) == 0:
+    history_refs = get_history_doc_refs(db, finalurl_or_dealroomid)
+    if history_refs == -1:
+        return ERROR
+    # CREATE: If there is not available documents in history
+    elif len(history_refs) == 0:
         # Add any default values to the payload
         _payload = {
             "dealroom_id": -1,
             **payload
         }
         # Validate that the new document will have the minimum required fields
-        _validate_new_history_doc_payload(_payload)
-        # Create a list so the next iteration works for a new history document as well.
-        history_refs = [history_col.document()]
+        try:
+            _validate_new_history_doc_payload(_payload)
+        except (ValueError, KeyError) as ex:
+            logging.error(ex)
+            return ERROR
+        history_ref = history_col.document()
+  
+    # UPDATE:
+    elif len(history_refs) == 1:
+        try:
+            _validate_update_history_doc_payload(_payload)
+        except ValueError as ex:
+            logging.error(ex)
+            return ERROR
 
-    for history_ref in history_refs:
-        _validate_update_history_doc_payload(_payload)
+        history_ref = history_refs[0]
+    # If more than one document was found then it's an error.
+    else:
+         # TODO: Raise a Custom Exception (DuplicateDocumentsException) with the same message when we replace ERROR constant with actual exceptions
+        logging.error("Found more than one documents to update for this payload")
+        return ERROR
+    
+    res = set(history_ref, _payload)
+        
+    if res == -1:
+        # TODO: Raise a Custom Exception (FirestoreException) with the same message when we replace ERROR constant with actual exceptions
+        logging.error(f"Couldn't `set` document {domain}. Please check logs above.")
+        return ERROR
+   
 
-        res = set(history_ref, _payload)
-
-        if res == -1:
-            raise Exception(
-                f"Couldn't `set` document {domain}. Please check logs above."
-            )
 
 
 

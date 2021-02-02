@@ -18,18 +18,20 @@ def test_collection_exists():
 
 def test_set_history_doc_refs_empty_final_url():
     db = fc.new_connection(project=TEST_PROJECT) 
-    with pytest.raises(KeyError, match=r"'final_url'"):
-        fc.set_history_doc_refs(db, {
-            "dealroom_id": "123123"
-        })
+    # with pytest.raises(KeyError, match=r"'final_url'"):
+    res = fc.set_history_doc_refs(db, {
+        "dealroom_id": "123123"
+    })
+    assert res == -1 
 
 def test_set_history_doc_refs_wrong_final_url():
     db = fc.new_connection(project=TEST_PROJECT) 
-    with pytest.raises(Exception):
-        fc.set_history_doc_refs(db, {
-            "final_url": "asddsadsdsd",
-            "dealroom_id": "123123"
-        })
+    # with pytest.raises(Exception):
+    res = fc.set_history_doc_refs(db, {
+        "final_url": "asddsadsdsd",
+        "dealroom_id": "123123"
+    })
+    assert res == -1
 
 
 def test_set_history_doc_refs_empty_dealroom_id():
@@ -43,11 +45,12 @@ def test_set_history_doc_refs_empty_dealroom_id():
 
 def test_set_history_doc_refs_wrong_dealroom_id():
     db = fc.new_connection(project=TEST_PROJECT) 
-    with pytest.raises(ValueError, match=r"'dealroom_id'"):
-        fc.set_history_doc_refs(db, {
-            "final_url": "foo2.bar",
-            "dealroom_id": "foobar"
-        })
+    # with pytest.raises(ValueError, match=r"'dealroom_id'"):
+    res = fc.set_history_doc_refs(db, {
+        "final_url": "foo2.bar",
+        "dealroom_id": "foobar"
+    })
+    assert res == -1
 
 def test_set_history_doc_refs_new():
     db = fc.new_connection(project=TEST_PROJECT) 
