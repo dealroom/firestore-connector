@@ -20,7 +20,7 @@ setuptools.setup(
     ],
     install_requires=[
         "google-cloud-firestore",
-        "dealroom_urlextract @ git+https://github.com/dealroom/data-firestore-connector/tree/set-history-url#egg=dealroom_urlextract",
+        "dealroom_urlextract @ git+https://github.com/dealroom/data-urlextract#egg=dealroom_urlextract"
     ],
     python_requires=">=3.6",
 )
