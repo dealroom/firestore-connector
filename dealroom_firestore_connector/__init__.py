@@ -303,6 +303,8 @@ def set_history_doc_refs(
         # TODO: Raise a Custom Exception (FirestoreException) with the same message when we replace ERROR constant with actual exceptions
         logging.error(f"Couldn't `set` document {domain}. Please check logs above.")
         return ERROR
+
+    return SUCCESS
    
 
 
