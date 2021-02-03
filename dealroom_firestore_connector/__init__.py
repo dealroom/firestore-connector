@@ -210,12 +210,14 @@ _NOT_IN_DEALROOM_ENTITY_ID = -1
 
 
 def _validate_dealroomid(dealroom_id: Union[str, int]):
-    # isnumeric() returns False for negative numbers. Thus, we check it manually.
-    if not str(dealroom_id).isnumeric() and int(dealroom_id) not in [
-        _DELETED_DEALROOM_ENTITY_ID,
-        _NOT_IN_DEALROOM_ENTITY_ID,
-    ]:
-        raise ValueError("'dealroom_id' must be an integer")
+    try:
+        int_dealroom_id = int(dealroom_id)
+        if int_dealroom_id < -2:
+            raise ValueError
+    except ValueError:
+        raise ValueError(
+            "'dealroom_id' must be an integer and bigger than -2. Use -2 for deleted entities & -1 for not dealroom entities"
+        )
 
 
 def _validate_final_url(final_url: str):
