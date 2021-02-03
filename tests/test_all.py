@@ -69,6 +69,18 @@ def test_set_history_doc_refs_empty_dealroom_id():
     })
     assert res == SUCCESS
     
+def test_set_history_doc_refs_empty_final_url():
+    """Updating a new document, with valid final_url & w/o dealroom id should be ok"""
+    db = fc.new_connection(project=TEST_PROJECT) 
+    random_field = _get_random_string(10)
+    EXISTING_DOC_DR_ID = "10000000000023"
+    res = fc.set_history_doc_refs(db, {
+        "dealroom_id": EXISTING_DOC_DR_ID,
+        "test_field": random_field
+    })
+
+    assert res == SUCCESS
+    
 
 def test_set_history_doc_refs_wrong_dealroom_id():
     """Creating/Updating a new document, with invalid dealroomid should raise an error"""
