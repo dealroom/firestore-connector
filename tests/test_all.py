@@ -108,6 +108,7 @@ def test_set_history_doc_refs_wrong_dealroom_id():
 def test_set_history_doc_refs_as_deleted():
     """Marking an entity as deleted (dealroom_id = -2), should be ok"""
     db = fc.new_connection(project=TEST_PROJECT)
-    res = fc.set_history_doc_refs(db, {"dealroom_id": "-2"}, "foo2.bar")
+    EXISTING_DOC_FINAL_URL = "foo2.bar"
+    res = fc.set_history_doc_refs(db, {"dealroom_id": "-2"}, EXISTING_DOC_FINAL_URL)
 
     assert res == SUCCESS
