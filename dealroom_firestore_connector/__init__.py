@@ -211,6 +211,7 @@ _NOT_IN_DEALROOM_ENTITY_ID = -1
 
 def _validate_dealroomid(dealroom_id: Union[str, int]):
     try:
+        # This will raise a ValueError in case that dealroom_id is not an integer
         int_dealroom_id = int(dealroom_id)
         if int_dealroom_id < -2:
             raise ValueError
