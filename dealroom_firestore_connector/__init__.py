@@ -300,7 +300,7 @@ def set_history_doc_refs(
         
     if res == -1:
         # TODO: Raise a Custom Exception (FirestoreException) with the same message when we replace ERROR constant with actual exceptions
-        logging.error(f"Couldn't `set` document {domain}. Please check logs above.")
+        logging.error(f"Couldn't `set` document {finalurl_or_dealroomid}. Please check logs above.")
         return ERROR
 
     return SUCCESS
