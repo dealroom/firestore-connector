@@ -18,6 +18,7 @@ def test_collection_exists():
 
 def test_set_history_doc_refs_empty_final_url():
     db = fc.new_connection(project=TEST_PROJECT) 
+    # TODO: Use it as soon as firestore-connector will raise a proper Error
     # with pytest.raises(KeyError, match=r"'final_url'"):
     res = fc.set_history_doc_refs(db, {
         "dealroom_id": "123123"
@@ -26,6 +27,7 @@ def test_set_history_doc_refs_empty_final_url():
 
 def test_set_history_doc_refs_wrong_final_url():
     db = fc.new_connection(project=TEST_PROJECT) 
+    # TODO: Use it as soon as firestore-connector will raise a proper Error
     # with pytest.raises(Exception):
     res = fc.set_history_doc_refs(db, {
         "final_url": "asddsadsdsd",
@@ -45,6 +47,7 @@ def test_set_history_doc_refs_empty_dealroom_id():
 
 def test_set_history_doc_refs_wrong_dealroom_id():
     db = fc.new_connection(project=TEST_PROJECT) 
+    # TODO: Use it as soon as firestore-connector will raise a proper Error
     # with pytest.raises(ValueError, match=r"'dealroom_id'"):
     res = fc.set_history_doc_refs(db, {
         "final_url": "foo2.bar",
