@@ -284,7 +284,7 @@ def set_history_doc_refs(
 
     if history_refs == ERROR:
         return ERROR
-    # CREATE: If there is not available documents in history
+    # CREATE: If there are not available documents in history
     elif len(history_refs) == 0:
         # Add any default values to the payload
         _payload = {
