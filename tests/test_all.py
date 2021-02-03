@@ -3,6 +3,7 @@ import string
 
 import dealroom_firestore_connector as fc
 import pytest
+from dealroom_firestore_connector.status_codes import ERROR, SUCCESS
 
 
 def _get_random_string(length):
@@ -23,7 +24,7 @@ def test_set_history_doc_refs_empty_final_url():
     res = fc.set_history_doc_refs(db, {
         "dealroom_id": "123123"
     })
-    assert res == -1 
+    assert res == ERROR
 
 def test_set_history_doc_refs_wrong_final_url():
     db = fc.new_connection(project=TEST_PROJECT) 
@@ -33,16 +34,17 @@ def test_set_history_doc_refs_wrong_final_url():
         "final_url": "asddsadsdsd",
         "dealroom_id": "123123"
     })
-    assert res == -1
+    assert res == ERROR
 
 
 def test_set_history_doc_refs_empty_dealroom_id():
     db = fc.new_connection(project=TEST_PROJECT) 
     random_field = _get_random_string(10)
-    fc.set_history_doc_refs(db, {
+    res = fc.set_history_doc_refs(db, {
         "final_url": "foo2.bar",
         "test_field": random_field
     })
+    assert res == SUCCESS
     
 
 def test_set_history_doc_refs_wrong_dealroom_id():
@@ -57,15 +59,18 @@ def test_set_history_doc_refs_wrong_dealroom_id():
 
 def test_set_history_doc_refs_new():
     db = fc.new_connection(project=TEST_PROJECT) 
-    fc.set_history_doc_refs(db, {
+    res = fc.set_history_doc_refs(db, {
         "final_url": f"{_get_random_string(10)}.com"
     })
+
+    assert res == SUCCESS
 
 def test_set_history_doc_refs_update_by_final_url():
     db = fc.new_connection(project=TEST_PROJECT) 
     random_field = _get_random_string(10)
-    fc.set_history_doc_refs(db, {
+    res = fc.set_history_doc_refs(db, {
         "final_url": "foo.bar",
         "test_field": random_field
     })
-    
+
+    assert res == SUCCESS
