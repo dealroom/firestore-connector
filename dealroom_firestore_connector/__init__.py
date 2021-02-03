@@ -238,7 +238,8 @@ def _validate_update_history_doc_payload(payload: dict):
 
 def set_history_doc_refs(
     db: firestore.Client,
-    payload: dict
+    payload: dict,
+    finalurl_or_dealroomid: str = None
 ) -> None:
     """Updates or creates a document in history collection
 
@@ -246,6 +247,7 @@ def set_history_doc_refs(
         db (firestore.Client): the client that will perform the operations.
         payload (dict): The actual data that the newly created will have or the fields to update.
                         'final_url' or 'dealroom_id' is required to find the correct document to set.
+        finalurl_or_dealroomid (str): either a domain or a dealroom ID. Query documents that match this parameter.
 
     Examples:
         >>> db = new_connection(project=FIRESTORE_PROJECT_ID)
@@ -253,18 +255,12 @@ def set_history_doc_refs(
     """
 
     history_col = db.collection(HISTORY_COLLECTION_PATH)
-
-    finalurl_or_dealroomid = payload.get("final_url") or payload.get("dealroom_id")
-    if not finalurl_or_dealroomid:
-        # TODO: Raise a KeyError with the same message when we replace ERROR constant with actual exceptions
-        logging.error("At least one of 'final_url' or 'dealroom_id' need to be defined in the 'payload' param")
-        return ERROR
-        
-
     
     _payload = { **payload }
 
-    history_refs = get_history_doc_refs(db, finalurl_or_dealroomid)
+    # If finalurl_or_dealroomid is not provided then a new document will be created.
+    history_refs = get_history_doc_refs(db, finalurl_or_dealroomid) if finalurl_or_dealroomid else []
+
     if history_refs == -1:
         return ERROR
     # CREATE: If there is not available documents in history
@@ -297,6 +293,9 @@ def set_history_doc_refs(
         logging.error("Found more than one documents to update for this payload")
         return ERROR
     
+    # Ensure that dealroom_id is type of number
+    if "dealroom_id" in _payload:
+        _payload["dealroom_id"] = int(_payload["dealroom_id"])
     res = set(history_ref, _payload)
         
     if res == -1:

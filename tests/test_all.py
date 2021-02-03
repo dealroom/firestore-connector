@@ -60,24 +60,23 @@ def test_set_history_doc_refs_new():
     assert res == SUCCESS
 
 def test_set_history_doc_refs_empty_dealroom_id():
-    """Updating a new document, with valid final_url & w/o dealroom id should be ok"""
+    """Updating a new document, using a valid final_url, should be ok"""
     db = fc.new_connection(project=TEST_PROJECT) 
     random_field = _get_random_string(10)
     res = fc.set_history_doc_refs(db, {
-        "final_url": "foo2.bar",
         "test_field": random_field
-    })
+    }, "foo2.bar")
     assert res == SUCCESS
     
 def test_set_history_doc_refs_empty_final_url():
-    """Updating a new document, with valid final_url & w/o dealroom id should be ok"""
+    """Updating a new document, using a valid dealroom_id, should be ok"""
     db = fc.new_connection(project=TEST_PROJECT) 
     random_field = _get_random_string(10)
     EXISTING_DOC_DR_ID = "10000000000023"
+    
     res = fc.set_history_doc_refs(db, {
-        "dealroom_id": EXISTING_DOC_DR_ID,
         "test_field": random_field
-    })
+    }, EXISTING_DOC_DR_ID)
 
     assert res == SUCCESS
     
