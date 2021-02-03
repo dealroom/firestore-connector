@@ -82,7 +82,7 @@ def test_set_history_doc_refs_empty_final_url():
     
 
 def test_set_history_doc_refs_wrong_dealroom_id():
-    """Creating/Updating a new document, with invalid dealroomid should raise an error"""
+    """Creating a new document, with invalid dealroomid should raise an error"""
     db = fc.new_connection(project=TEST_PROJECT) 
     # TODO: Use it as soon as firestore-connector will raise a proper Error
     # with pytest.raises(ValueError, match=r"'dealroom_id'"):
