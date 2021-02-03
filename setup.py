@@ -18,6 +18,9 @@ setuptools.setup(
         "License :: OSI Approved :: MIT License",
         "Operating System :: OS Independent",
     ],
-    install_requires=["google-cloud-firestore"],
+    install_requires=[
+        "google-cloud-firestore",
+        "dealroom-urlextract @ git+https://github.com/dealroom/data-urlextract@main#egg=dealroom_urlextract"
+    ],
     python_requires=">=3.6",
 )
