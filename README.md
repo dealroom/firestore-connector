@@ -12,7 +12,7 @@ A wrapper class for accessing Google Cloud Firestore based on our business logic
 
 ```suggestion
 -dealroom-urlextract==0.1.0
-+dealroom-urlextract @ git+https://github.com/dealroom/data-urlextract.git@main
++dealroom-urlextract @ git+https://github.com/dealroom/data-urlextract@main#egg=dealroom_urlextract
 ```
 
 This is an issue from Poetry.
