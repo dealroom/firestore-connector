@@ -12,7 +12,7 @@ from google.cloud.firestore_v1.document import DocumentReference
 
 from .batch import Batcher
 from .helpers import error_logger
-from .status_codes import ERROR, SUCCESS
+from .status_codes import ERROR, SUCCESS, CREATED, UPDATED
 
 # Time to sleep in seconds when a exception occurrs until retrying
 EXCEPTION_SLEEP_TIME = 5
@@ -285,6 +285,8 @@ def set_history_doc_refs(
         else []
     )
 
+    operation_status_code = ERROR
+
     if history_refs == ERROR:
         return ERROR
     # CREATE: If there are not available documents in history
@@ -302,6 +304,7 @@ def set_history_doc_refs(
             logging.error(ex)
             return ERROR
         history_ref = history_col.document()
+        operation_status_code = CREATED
 
     # UPDATE:
     elif len(history_refs) == 1:
@@ -312,6 +315,7 @@ def set_history_doc_refs(
             return ERROR
 
         history_ref = history_refs[0]
+        operation_status_code = UPDATED
     # If more than one document were found then it's an error.
     else:
         # TODO: Raise a Custom Exception (DuplicateDocumentsException) with the same message when we replace ERROR constant with actual exceptions
@@ -330,7 +334,7 @@ def set_history_doc_refs(
         )
         return ERROR
 
-    return SUCCESS
+    return operation_status_code
 
 
 def __log_exception(error_code, ref, identifier, was_retried=False):
