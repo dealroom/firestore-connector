@@ -58,8 +58,27 @@ def get(doc_ref, *args, **kwargs):
             # log error
             __log_exception(3, doc_ref, identifier, True)
             return ERROR
+        
 
-
+def _parse_payload(obj, key, replace_value):
+    """Returns the passed payload with the values for the specified key
+       replaced by the replaced_value (nested)
+    Args:
+        obj (dict): payload to parse
+        key (str): key to look for
+        replace_value (object): value to add
+    """
+    for k, v in obj.items():
+      if isinstance(v, dict):
+        obj[k] = _parse_payload(v, key, replace_value)
+      if isinstance(v, list):  
+        obj[k] = [_parse_payload(i) for i in v]
+      if key in obj:
+        obj[key] = replace_value
+    return obj
+    
+    
+    
 def set(doc_ref, *args, **kwargs):
     """Create a new document in Firestore
     Args:
@@ -275,8 +294,11 @@ def set_history_doc_refs(
     """
 
     history_col = db.collection(HISTORY_COLLECTION_PATH)
+    
+    # Setting SERVER_TIMESTAMP for 'timestamp' key
+    parsed_payload = _parse_payload(payload, 'timestamp', firestore.SERVER_TIMESTAMP)
 
-    _payload = {**payload}
+    _parsed_payload  = {**parsed_payload}
 
     # If finalurl_or_dealroomid is not provided then a new document will be created.
     history_refs = (
@@ -292,14 +314,14 @@ def set_history_doc_refs(
     # CREATE: If there are not available documents in history
     elif len(history_refs) == 0:
         # Add any default values to the payload
-        _payload = {
+        _parsed_payload  = {
             "dealroom_id": _NOT_IN_DEALROOM_ENTITY_ID,
             "final_url": "",
-            **payload,
+            **parsed_payload,
         }
         # Validate that the new document will have the minimum required fields
         try:
-            _validate_new_history_doc_payload(_payload)
+            _validate_new_history_doc_payload(_parsed_payload)
         except (ValueError, KeyError) as ex:
             logging.error(ex)
             return ERROR
@@ -309,7 +331,7 @@ def set_history_doc_refs(
     # UPDATE:
     elif len(history_refs) == 1:
         try:
-            _validate_update_history_doc_payload(_payload)
+            _validate_update_history_doc_payload(_parsed_payload)
         except ValueError as ex:
             logging.error(ex)
             return ERROR
@@ -323,9 +345,9 @@ def set_history_doc_refs(
         return ERROR
 
     # Ensure that dealroom_id is type of number
-    if "dealroom_id" in _payload:
-        _payload["dealroom_id"] = int(_payload["dealroom_id"])
-    res = set(history_ref, _payload)
+    if "dealroom_id" in _parsed_payload :
+        _parsed_payload["dealroom_id"] = int(_parsed_payload["dealroom_id"])
+    res = set(history_ref, _parsed_payload)
 
     if res == ERROR:
         # TODO: Raise a Custom Exception (FirestoreException) with the same message when we replace ERROR constant with actual exceptions
