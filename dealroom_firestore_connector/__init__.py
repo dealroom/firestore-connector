@@ -292,11 +292,10 @@ def set_history_doc_refs(
     # CREATE: If there are not available documents in history
     elif len(history_refs) == 0:
         # Add any default values to the payload
-        _payload = {
-            "dealroom_id": _NOT_IN_DEALROOM_ENTITY_ID,
-            "final_url": "",
-            **payload,
-        }
+        if "dealroom_id" not in _payload:
+            _payload["dealroom_id"] = _NOT_IN_DEALROOM_ENTITY_ID
+        if "final_url" not in _payload:
+            _payload["final_url"] = ""
         # Validate that the new document will have the minimum required fields
         try:
             _validate_new_history_doc_payload(_payload)
