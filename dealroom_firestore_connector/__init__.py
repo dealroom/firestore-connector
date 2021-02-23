@@ -164,14 +164,14 @@ HISTORY_COLLECTION_PATH = "history"
 
 
 def get_history_doc_refs(
-    db: firestore.Client, finalurl_or_dealroomid: str
+    db: firestore.Client, websiteurl_or_dealroomid: str
 ) -> Union[Tuple[DocumentReference], int]:
-    """Returns a DocumentReference based on the final_url field or dealroom_id
+    """Returns a DocumentReference based on the final_url field, current_related_urls or dealroom_id
     field.
 
     Args:
         db (firestore.Client): the client that will perform the operations.
-        finalurl_or_dealroomid (str): either a domain or a dealroom ID. Query documents that match this parameter.
+        websiteurl_or_dealroomid (str): either a domain or a dealroom ID. Query documents that match this parameter.
 
     Returns:
         Tuple[DocumentReference]: a sequence of document references matching the input parameter.
@@ -183,24 +183,33 @@ def get_history_doc_refs(
 
     collection_ref = db.collection(HISTORY_COLLECTION_PATH)
 
-    if str(finalurl_or_dealroomid).isnumeric():
-        query_params = ["dealroom_id", "==", int(finalurl_or_dealroomid)]
+    if str(websiteurl_or_dealroomid).isnumeric():
+        queries = [["dealroom_id", "==", int(websiteurl_or_dealroomid)]]
     else:
         # Extract the final_url in the required format, so we can query the collection with the exact match.
         try:
-            final_url = extract(finalurl_or_dealroomid)
+            website_url = extract(websiteurl_or_dealroomid)
         except:
-            logging.error(f"'final_url': {finalurl_or_dealroomid} is not a valid url")
+            logging.error(f"'final_url': {websiteurl_or_dealroomid} is not a valid url")
             return ERROR
-        query_params = ["final_url", "==", final_url]
-
-    query = collection_ref.where(*query_params)
-    docs = stream(query)
-    if docs == ERROR:
-        logging.error("Couldn't stream query.")
-        return ERROR
-
-    return tuple(doc.reference for doc in docs)
+        queries = [
+            ["final_url", "==", website_url],
+            ["current_related_urls", "array_contains", website_url]
+        ]
+    
+    doc_refs = []
+    # Perform all the prepared queries
+    for query_params in queries:
+        query = collection_ref.where(*query_params)
+        docs = stream(query)
+        if docs == ERROR:
+            logging.error("Couldn't stream query.")
+            return ERROR
+        # Add the doc refs to a list (we need to check if the doc is already there because we're running several queries)
+        for doc in docs:
+            if doc.reference not in doc_refs:
+                doc_refs.append(doc.reference)
+    return tuple(reference for reference in doc_refs)
 
 
 # We mark the deleted entities from DR database with -2 entity so we can easily identify them.
@@ -340,15 +349,15 @@ def set_history_doc_refs(
 def __log_exception(error_code, ref, identifier, was_retried=False):
     message = "Unknown error"
     if error_code == 1:
-        message = f"An error occurred retrieving stream for collection {ref}."
+        message = f"An error occurred retrieving stream for collection {ref.path}."
     elif error_code == 2:
-        message = f"An error occurred updating document {ref}."
+        message = f"An error occurred updating document {ref.path}."
     elif error_code == 3:
-        message = f"An error occurred getting document {ref}."
+        message = f"An error occurred getting document {ref.path}."
     elif error_code == 4:
-        message = f"An error occurred creating document {ref}."
+        message = f"An error occurred creating document {ref.path}."
     elif error_code == 5:
-        message = f"Error connecting with db with credentials file {ref}."
+        message = f"Error connecting with db with credentials file {ref.path}."
 
     if was_retried:
         # TODO save to csv or json
