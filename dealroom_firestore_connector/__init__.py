@@ -181,11 +181,7 @@ def get_history_doc_refs(db: firestore.Client, websiteurl_or_dealroomid: str):
     """
 
     collection_ref = db.collection(HISTORY_COLLECTION_PATH)
-    result = {
-        "dealroom_id": [],
-        "final_url": [],
-        "current_related_urls": [],
-    }
+    result = {}
 
     if str(websiteurl_or_dealroomid).isnumeric():
         query_params = ["dealroom_id", "==", int(websiteurl_or_dealroomid)]
