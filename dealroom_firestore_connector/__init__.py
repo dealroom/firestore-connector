@@ -163,18 +163,17 @@ def collection_exists(collection_ref: CollectionReference):
 HISTORY_COLLECTION_PATH = "history"
 
 
-def get_history_doc_refs(
-    db: firestore.Client, finalurl_or_dealroomid: str
-) -> Union[Tuple[DocumentReference], int]:
-    """Returns a DocumentReference based on the final_url field or dealroom_id
+def get_history_doc_refs(db: firestore.Client, websiteurl_or_dealroomid: str):
+    """Returns a DocumentReference based on the final_url field, current_related_urls or dealroom_id
     field.
 
     Args:
         db (firestore.Client): the client that will perform the operations.
-        finalurl_or_dealroomid (str): either a domain or a dealroom ID. Query documents that match this parameter.
+        websiteurl_or_dealroomid (str): either a domain or a dealroom ID. Query documents that match this parameter.
 
     Returns:
-        Tuple[DocumentReference]: a sequence of document references matching the input parameter.
+        dict[DocumentReference]: a dictionary made of lists of document references matching the input parameter 
+            indicating if the match occured with the final_url field, current_related_urls or dealroom_id.
 
     Examples:
         >>> db = new_connection(project=FIRESTORE_PROJECT_ID)
@@ -182,25 +181,41 @@ def get_history_doc_refs(
     """
 
     collection_ref = db.collection(HISTORY_COLLECTION_PATH)
+    result = {}
 
-    if str(finalurl_or_dealroomid).isnumeric():
-        query_params = ["dealroom_id", "==", int(finalurl_or_dealroomid)]
+    if str(websiteurl_or_dealroomid).isnumeric():
+        query_params = ["dealroom_id", "==", int(websiteurl_or_dealroomid)]
+        query = collection_ref.where(*query_params)
+        docs = stream(query)
+        if docs == ERROR:
+            logging.error("Couldn't stream query.")
+            return ERROR
+        result["dealroom_id"] = [doc.reference for doc in docs]
     else:
         # Extract the final_url in the required format, so we can query the collection with the exact match.
         try:
-            final_url = extract(finalurl_or_dealroomid)
+            website_url = extract(websiteurl_or_dealroomid)
         except:
-            logging.error(f"'final_url': {finalurl_or_dealroomid} is not a valid url")
+            logging.error(f"'final_url': {websiteurl_or_dealroomid} is not a valid url")
             return ERROR
-        query_params = ["final_url", "==", final_url]
+    
+        query_params = ["final_url", "==", website_url]
+        query = collection_ref.where(*query_params)
+        docs = stream(query)
+        if docs == ERROR:
+            logging.error("Couldn't stream query.")
+            return ERROR
+        result["final_url"] = [doc.reference for doc in docs]
 
-    query = collection_ref.where(*query_params)
-    docs = stream(query)
-    if docs == ERROR:
-        logging.error("Couldn't stream query.")
-        return ERROR
-
-    return tuple(doc.reference for doc in docs)
+        query_params = ["current_related_urls", "array_contains", website_url]
+        query = collection_ref.where(*query_params)
+        docs = stream(query)
+        if docs == ERROR:
+            logging.error("Couldn't stream query.")
+            return ERROR
+        result["current_related_urls"] = [doc.reference for doc in docs]
+    
+    return result
 
 
 # We mark the deleted entities from DR database with -2 entity so we can easily identify them.
@@ -279,18 +294,25 @@ def set_history_doc_refs(
     _payload = {**payload}
 
     # If finalurl_or_dealroomid is not provided then a new document will be created.
-    history_refs = (
-        get_history_doc_refs(db, finalurl_or_dealroomid)
-        if finalurl_or_dealroomid
-        else []
-    )
+    history_refs = get_history_doc_refs(db, finalurl_or_dealroomid) if finalurl_or_dealroomid else {}
 
     operation_status_code = ERROR
 
     if history_refs == ERROR:
         return ERROR
+    if "dealroom_id" in history_refs:
+        count_history_refs = len(history_refs["dealroom_id"])
+        key_found = "dealroom_id"
+    elif "final_url" in history_refs and len(history_refs["final_url"]) > 0:
+        count_history_refs = len(history_refs["final_url"])
+        key_found = "final_url"
+    elif "current_related_urls" in history_refs and len(history_refs["current_related_urls"]) > 0:
+        count_history_refs = len(history_refs["current_related_urls"])
+        key_found = "current_related_urls"
+    else:
+        count_history_refs = 0
     # CREATE: If there are not available documents in history
-    elif len(history_refs) == 0:
+    if count_history_refs == 0:
         # Add any default values to the payload
         _payload = {
             "dealroom_id": _NOT_IN_DEALROOM_ENTITY_ID,
@@ -307,14 +329,14 @@ def set_history_doc_refs(
         operation_status_code = CREATED
 
     # UPDATE:
-    elif len(history_refs) == 1:
+    elif count_history_refs == 1:
         try:
             _validate_update_history_doc_payload(_payload)
         except ValueError as ex:
             logging.error(ex)
             return ERROR
 
-        history_ref = history_refs[0]
+        history_ref = history_refs[key_found][0]
         operation_status_code = UPDATED
     # If more than one document were found then it's an error.
     else:
@@ -340,15 +362,15 @@ def set_history_doc_refs(
 def __log_exception(error_code, ref, identifier, was_retried=False):
     message = "Unknown error"
     if error_code == 1:
-        message = f"An error occurred retrieving stream for collection {ref}."
+        message = f"An error occurred retrieving stream for collection {ref.path}."
     elif error_code == 2:
-        message = f"An error occurred updating document {ref}."
+        message = f"An error occurred updating document {ref.path}."
     elif error_code == 3:
-        message = f"An error occurred getting document {ref}."
+        message = f"An error occurred getting document {ref.path}."
     elif error_code == 4:
-        message = f"An error occurred creating document {ref}."
+        message = f"An error occurred creating document {ref.path}."
     elif error_code == 5:
-        message = f"Error connecting with db with credentials file {ref}."
+        message = f"Error connecting with db with credentials file {ref.path}."
 
     if was_retried:
         # TODO save to csv or json
