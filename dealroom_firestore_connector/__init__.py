@@ -294,18 +294,25 @@ def set_history_doc_refs(
     _payload = {**payload}
 
     # If finalurl_or_dealroomid is not provided then a new document will be created.
-    history_refs = (
-        get_history_doc_refs(db, finalurl_or_dealroomid)
-        if finalurl_or_dealroomid
-        else []
-    )
+    history_refs = get_history_doc_refs(db, finalurl_or_dealroomid) if finalurl_or_dealroomid else {}
 
     operation_status_code = ERROR
 
     if history_refs == ERROR:
         return ERROR
+    if "dealroom_id" in history_refs:
+        count_history_refs = len(history_refs["dealroom_id"])
+        key_found = "dealroom_id"
+    elif "final_url" in history_refs and len(history_refs["final_url"]) > 0:
+        count_history_refs = len(history_refs["final_url"])
+        key_found = "final_url"
+    elif "current_related_urls" in history_refs and len(history_refs["current_related_urls"]) > 0:
+        count_history_refs = len(history_refs["current_related_urls"])
+        key_found = "current_related_urls"
+    else:
+        count_history_refs = 0
     # CREATE: If there are not available documents in history
-    elif len(history_refs) == 0:
+    if count_history_refs == 0:
         # Add any default values to the payload
         _payload = {
             "dealroom_id": _NOT_IN_DEALROOM_ENTITY_ID,
@@ -322,14 +329,14 @@ def set_history_doc_refs(
         operation_status_code = CREATED
 
     # UPDATE:
-    elif len(history_refs) == 1:
+    elif count_history_refs == 1:
         try:
             _validate_update_history_doc_payload(_payload)
         except ValueError as ex:
             logging.error(ex)
             return ERROR
 
-        history_ref = history_refs[0]
+        history_ref = history_refs[key_found][0]
         operation_status_code = UPDATED
     # If more than one document were found then it's an error.
     else:
