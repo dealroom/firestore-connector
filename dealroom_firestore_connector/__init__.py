@@ -136,6 +136,53 @@ def stream(collection_ref, *args, **kwargs):
             return ERROR
 
 
+def get_all(base_query, page_size=20000):
+    """Useful to get queries on firestore with too many results (more than 100k),
+    that cannot be fetched with the normal .get due to the 60s deadline window.
+
+    Note: for limited queries this will still get all the docs, no matter the limit.
+
+    Args:
+        base_query ([type]): The firestore query to get()
+        page_size (int, optional): Change this only if you have a valid reason. Usually 2000 can be fetched in the 60s window. Defaults to 2000.
+
+    Returns:
+        list: The results of the query
+
+    Examples:
+        >>> db = firestore.Client(project="sustained-hold-288413")
+        >>> query = db.collections("urls").where("dealroom_id", ">", -1)
+        >>> get_all(query)
+    """
+
+    def _get_all(res=[], start_at=None):
+        query = base_query
+
+        print(f"{len(res)} documents fetched so far.")
+
+        if start_at:
+            query = query.start_after(start_at)
+
+        query = query.limit(page_size)
+        docs = stream(query)
+        if docs == ERROR:
+            return ERROR
+
+        results = [doc_snapshot for doc_snapshot in docs]
+        sum_results = [*res, *results]
+
+        has_more_results = len(results) >= page_size
+        # If there are more results then we continue to the next batch of .get
+        # using start at the last element from the last results.
+        if has_more_results:
+            start_at_next = results[-1]
+            return _get_all(sum_results, start_at_next)
+        else:
+            return sum_results
+
+    return _get_all()
+
+
 def collection_exists(collection_ref: CollectionReference):
     """A helper method to check whether a collection exists
 
@@ -172,7 +219,7 @@ def get_history_doc_refs(db: firestore.Client, websiteurl_or_dealroomid: str):
         websiteurl_or_dealroomid (str): either a domain or a dealroom ID. Query documents that match this parameter.
 
     Returns:
-        dict[DocumentReference]: a dictionary made of lists of document references matching the input parameter 
+        dict[DocumentReference]: a dictionary made of lists of document references matching the input parameter
             indicating if the match occured with the final_url field, current_related_urls or dealroom_id.
 
     Examples:
@@ -198,7 +245,7 @@ def get_history_doc_refs(db: firestore.Client, websiteurl_or_dealroomid: str):
         except:
             logging.error(f"'final_url': {websiteurl_or_dealroomid} is not a valid url")
             return ERROR
-    
+
         query_params = ["final_url", "==", website_url]
         query = collection_ref.where(*query_params)
         docs = stream(query)
@@ -214,7 +261,7 @@ def get_history_doc_refs(db: firestore.Client, websiteurl_or_dealroomid: str):
             logging.error("Couldn't stream query.")
             return ERROR
         result["current_related_urls"] = [doc.reference for doc in docs]
-    
+
     return result
 
 
