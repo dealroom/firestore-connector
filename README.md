@@ -2,10 +2,10 @@
 A wrapper class for accessing Google Cloud Firestore based on our business logic
 
 ## Install
-**pip**:  
-`pip install -e git+https://github.com/dealroom/data-firestore-connector.git#egg=dealroom-firestore-connector`  
+**pip**:
+`pip install -e git+https://github.com/dealroom/data-firestore-connector.git#egg=dealroom-firestore-connector`
 
-**Poetry**:  
+**Poetry**:
 `poetry add "git+https://github.com/dealroom/data-firestore-connector#main"`
 
 :exclamation: This package requires installing _[dealroom-urlextract](https://github.com/dealroom/data-urlextract)_. If you install firestore-connector using Poetry then, when generating requirements.txt you should make sure that _dealroom-urlextract_ is installed correctly like this: `dealroom-urlextract @ git+https://github.com/dealroom/data-urlextract.git@main`. You'll have to change this manually.
@@ -78,4 +78,7 @@ See [examples.py](examples.py) for more examples
 ---
 
 ## Contributing
-Every time a change is made we should bump up the version of the module at [setup.py](setup.py).
+Every time a change is made we should bump up the version of the module at [setup.py](setup.py):
+1. `cd to/repository/folder`
+2. activate your poetry env
+3. `./generate_setup.py.sh`
