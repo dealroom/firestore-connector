@@ -19,7 +19,11 @@ latest_tag=`git describe --tags`
 # increase version + 1 (to PATCH number)
 py_commands_to_increase_patch_version="
 import sys
-tag = sys.argv[1]
+
+# on a non-main branch the tag is like 'v1.0.20-1-g85e38e1'
+tag = sys.argv[1].split('-', 1)[0]
+
+# only keep the version numbers
 version_numbers = tag.strip('v').split('.')
 version_numbers[2] = str(int(version_numbers[2]) + 1)
 print('.'.join(version_numbers))
