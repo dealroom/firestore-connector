@@ -13,7 +13,7 @@ from google.cloud.firestore_v1.document import DocumentReference
 from .batch import Batcher
 from .helpers import error_logger
 from .status_codes import ERROR, SUCCESS, CREATED, UPDATED
-from datetime import datetime
+from datetime import datetime, timezone
 
 # Time to sleep in seconds when a exception occurrs until retrying
 EXCEPTION_SLEEP_TIME = 5
@@ -70,7 +70,7 @@ def _update_last_edit(doc_ref):
     """
     _path = doc_ref.path.split("/")
     if len(_path) == 2 and _path[0] == "history":
-        doc_ref.update({"last_edit": datetime.now()})
+        doc_ref.update({"last_edit": datetime.now(timezone.utc)})
 
 def set(doc_ref, *args, **kwargs):
     """Create a new document in Firestore

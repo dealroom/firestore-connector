@@ -7,7 +7,7 @@ from google.cloud import firestore
 
 from .helpers import error_logger
 from .status_codes import ERROR, SUCCESS
-from datetime import datetime
+from datetime import datetime, timezone
 
 
 class Batcher(firestore.WriteBatch):
@@ -53,7 +53,7 @@ class Batcher(firestore.WriteBatch):
 
     @_count_write
     def _update_last_edit(self, doc_ref):
-        super().update(doc_ref, {"last_edit": datetime.now()})
+        super().update(doc_ref, {"last_edit": datetime.now(timezone.utc)})
     
     def _check_if_update_last_edit(self, doc_ref):
         """If the document reference points to the history collection
