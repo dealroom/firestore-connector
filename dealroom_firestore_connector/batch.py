@@ -63,8 +63,8 @@ class Batcher(firestore.WriteBatch):
         Args:
             doc_ref ([type]): [description]
         """
-        _path = doc_ref.path.split("/", 1)
-        if len(_path) > 1 and _path[0] == "history":
+        _path = doc_ref.path.split("/")
+        if len(_path) == 2 and _path[0] == "history":
             self._update_last_edit(doc_ref)
 
     @_count_write
