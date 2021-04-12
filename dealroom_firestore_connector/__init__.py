@@ -258,6 +258,14 @@ def get_history_doc_refs(db: firestore.Client, websiteurl_or_dealroomid: str):
             logging.error("Couldn't stream query.")
             return ERROR
         result["dealroom_id"] = [doc.reference for doc in docs]
+
+        query_params = ["dealroom_id_old", "==", int(websiteurl_or_dealroomid)]
+        query = collection_ref.where(*query_params)
+        docs = stream(query)
+        if docs == ERROR:
+            logging.error("Couldn't stream query.")
+            return ERROR
+        result["dealroom_id_old"] = [doc.reference for doc in docs]
     else:
         # Extract the final_url in the required format, so we can query the collection with the exact match.
         try:
@@ -370,6 +378,11 @@ def set_history_doc_refs(
     if "dealroom_id" in history_refs:
         count_history_refs = len(history_refs["dealroom_id"])
         key_found = "dealroom_id"
+    elif "dealroom_id_old" in history_refs:
+        # we found a matching document but we're trying to update an entity that was removed
+        #TODO: raise a Custom Exception (DeletedEntityException)
+        logging.error("Trying to update a deleted entity.")
+        return ERROR
     elif "final_url" in history_refs and len(history_refs["final_url"]) > 0:
         count_history_refs = len(history_refs["final_url"])
         key_found = "final_url"
