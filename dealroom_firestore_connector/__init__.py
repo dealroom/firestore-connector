@@ -489,6 +489,10 @@ def get_people_doc_refs(
 
     Returns:
         [DocumentReference]: if no documents are found, return None, else a list of matching documents.
+    
+    Examples:
+        >>> fc.get_people_doc_refs(db, "dealroom_id", "==", 1169416)[0].to_dict()
+        >>> fc.get_people_doc_refs(db, "linkedin", "array_contains", "https://www.linkedin.com/in/vess/")[0].to_dict()
     """
 
     people_collection_ref = db.collection("people")
@@ -506,7 +510,7 @@ def get_people_doc_refs(
     if num_matching_docs == 0:
         return None
 
-    return matching_doc
+    return matching_docs
 
 def _validate_new_people_doc_payload(payload: dict):
     """Validate the required fields in the payload when creating a new document in the people collection"""
@@ -534,13 +538,17 @@ def set_people_doc_ref(
 
     Returns:
         [DocumentReference]: if no documents are found, return None, else a list of matching documents.
+
+    Examples:
+        >>> fc.set_people_doc_ref(db, "dealroom_id", "==", 1003809000, {"foo":"bar"})
+        >>> fc.set_people_doc_ref(db, "linkedin", "array_contains", "https://www.linkedin.com/in/vess/", {"foo":["bar",2]})
     """
     people_collection_ref = db.collection("people")
 
     _payload = {**payload}
 
-    people_refs = get_people_doc_refs(db, field_value, operator, field_value) if field_name and operator and field_value else []
-    matching_docs = len(people_refs)
+    people_refs = get_people_doc_refs(db, field_name, operator, field_value) if field_name and operator and field_value else []
+    matching_docs = len(people_refs) if people_refs else 0
 
     # CREATE: If there are not mayching documents in people
     if matching_docs == 0:
@@ -561,7 +569,7 @@ def set_people_doc_ref(
          # Ensure that dealroom_id is type of number if it appears on the payload
         if "dealroom_id" in _payload:
             _validate_dealroomid(_payload["dealroom_id"])
-        people_doc_ref = people_refs[0]
+        people_doc_ref = people_refs[0].reference
         operation_status_code = UPDATED
     # If more than one document were found then it's an error.
     else:
@@ -576,7 +584,7 @@ def set_people_doc_ref(
         # TODO: Raise a Custom Exception (FirestoreException) with the same message when we replace ERROR constant with actual exceptions
         #   (DN-932: https://dealroom.atlassian.net/browse/DN-932)
         logging.error(
-            f"Couldn't `set` document {finalurl_or_dealroomid}. Please check logs above."
+            f"Couldn't `set` document {people_doc_ref.id}. Please check logs above."
         )
         return ERROR
 
