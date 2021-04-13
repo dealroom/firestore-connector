@@ -34,6 +34,7 @@ def new_connection(project: str, credentials_path: str = None):
             return firestore.Client(project=project)
     except Exception as identifier:
         __log_exception(5, credentials_path, identifier, True)
+        #TODO: raise Custom Exception (DN-932: https://dealroom.atlassian.net/browse/DN-932)
         return ERROR
 
 
@@ -58,6 +59,7 @@ def get(doc_ref, *args, **kwargs):
         except Exception as identifier:
             # log error
             __log_exception(3, doc_ref, identifier, True)
+            #TODO: raise Custom Exception (DN-932: https://dealroom.atlassian.net/browse/DN-932)
             return ERROR
 
 def _update_last_edit(doc_ref):
@@ -101,6 +103,7 @@ def set(doc_ref, *args, **kwargs):
         except Exception as identifier:
             # log error
             __log_exception(4, doc_ref, identifier, True)
+            #TODO: raise Custom Exception (DN-932: https://dealroom.atlassian.net/browse/DN-932)
             return ERROR
 
 
@@ -129,6 +132,7 @@ def update(doc_ref, *args, **kwargs):
         except Exception as identifier:
             # log error
             __log_exception(2, doc_ref, identifier, True)
+            #TODO: raise Custom Exception (DN-932: https://dealroom.atlassian.net/browse/DN-932)
             return ERROR
 
 
@@ -153,6 +157,7 @@ def stream(collection_ref, *args, **kwargs):
         except Exception as identifier:
             # log error
             __log_exception(1, collection_ref, identifier, True)
+            #TODO: raise Custom Exception (DN-932: https://dealroom.atlassian.net/browse/DN-932)
             return ERROR
 
 
@@ -186,6 +191,7 @@ def get_all(base_query, page_size=20000):
         query = query.limit(page_size)
         docs = stream(query)
         if docs == ERROR:
+            #TODO: raise Custom Exception (DN-932: https://dealroom.atlassian.net/browse/DN-932)
             return ERROR
 
         results = [doc_snapshot for doc_snapshot in docs]
@@ -255,6 +261,7 @@ def get_history_doc_refs(db: firestore.Client, websiteurl_or_dealroomid: str):
         query = collection_ref.where(*query_params)
         docs = stream(query)
         if docs == ERROR:
+            #TODO: raise Custom Exception (DN-932: https://dealroom.atlassian.net/browse/DN-932)
             logging.error("Couldn't stream query.")
             return ERROR
         result["dealroom_id"] = [doc.reference for doc in docs]
@@ -263,6 +270,7 @@ def get_history_doc_refs(db: firestore.Client, websiteurl_or_dealroomid: str):
         query = collection_ref.where(*query_params)
         docs = stream(query)
         if docs == ERROR:
+            #TODO: raise Custom Exception (DN-932: https://dealroom.atlassian.net/browse/DN-932)
             logging.error("Couldn't stream query.")
             return ERROR
         result["dealroom_id_old"] = [doc.reference for doc in docs]
@@ -271,6 +279,7 @@ def get_history_doc_refs(db: firestore.Client, websiteurl_or_dealroomid: str):
         try:
             website_url = extract(websiteurl_or_dealroomid)
         except:
+            #TODO: raise Custom Exception (DN-932: https://dealroom.atlassian.net/browse/DN-932)
             logging.error(f"'final_url': {websiteurl_or_dealroomid} is not a valid url")
             return ERROR
 
@@ -278,6 +287,7 @@ def get_history_doc_refs(db: firestore.Client, websiteurl_or_dealroomid: str):
         query = collection_ref.where(*query_params)
         docs = stream(query)
         if docs == ERROR:
+            #TODO: raise Custom Exception (DN-932: https://dealroom.atlassian.net/browse/DN-932)
             logging.error("Couldn't stream query.")
             return ERROR
         result["final_url"] = [doc.reference for doc in docs]
@@ -286,6 +296,7 @@ def get_history_doc_refs(db: firestore.Client, websiteurl_or_dealroomid: str):
         query = collection_ref.where(*query_params)
         docs = stream(query)
         if docs == ERROR:
+            #TODO: raise Custom Exception (DN-932: https://dealroom.atlassian.net/browse/DN-932)
             logging.error("Couldn't stream query.")
             return ERROR
         result["current_related_urls"] = [doc.reference for doc in docs]
@@ -374,6 +385,7 @@ def set_history_doc_refs(
     operation_status_code = ERROR
 
     if history_refs == ERROR:
+        #TODO: raise Custom Exception (DN-932: https://dealroom.atlassian.net/browse/DN-932)
         return ERROR
     if "dealroom_id" in history_refs and len(history_refs["dealroom_id"]) > 0:
         count_history_refs = len(history_refs["dealroom_id"])
@@ -401,6 +413,7 @@ def set_history_doc_refs(
         try:
             _validate_new_history_doc_payload(_payload)
         except (ValueError, KeyError) as ex:
+            #TODO: raise Custom Exception (DN-932: https://dealroom.atlassian.net/browse/DN-932)
             logging.error(ex)
             return ERROR
         history_ref = history_col.document()
@@ -411,6 +424,7 @@ def set_history_doc_refs(
         try:
             _validate_update_history_doc_payload(_payload)
         except ValueError as ex:
+            #TODO: raise Custom Exception (DN-932: https://dealroom.atlassian.net/browse/DN-932)
             logging.error(ex)
             return ERROR
 
@@ -419,6 +433,7 @@ def set_history_doc_refs(
     # If more than one document were found then it's an error.
     else:
         # TODO: Raise a Custom Exception (DuplicateDocumentsException) with the same message when we replace ERROR constant with actual exceptions
+        #   (DN-932: https://dealroom.atlassian.net/browse/DN-932)
         logging.error("Found more than one documents to update for this payload")
         return ERROR
 
@@ -429,6 +444,7 @@ def set_history_doc_refs(
 
     if res == ERROR:
         # TODO: Raise a Custom Exception (FirestoreException) with the same message when we replace ERROR constant with actual exceptions
+        #   (DN-932: https://dealroom.atlassian.net/browse/DN-932)
         logging.error(
             f"Couldn't `set` document {finalurl_or_dealroomid}. Please check logs above."
         )
@@ -455,3 +471,39 @@ def __log_exception(error_code, ref, identifier, was_retried=False):
         error_logger(message, error_code)
     else:
         logging.error(f"[Error code {error_code}] {message} Retrying...")
+
+
+def get_people_doc_refs(
+    db: firestore.Client,
+    field_name: str,
+    operator: str,
+    field_value,
+):
+    """Query 'people' collection for a document whose 'field_name' has 'operator'
+    relation with 'field_value'.
+
+    Args:
+        field_name (str): the field to query for.
+        operator (str): determines the condition for matching ('==', ...).
+        field_value (Any): the value that satisfies the condition.
+
+    Returns:
+        [DocumentReference]: if no documents are found, return None, else a list of matching documents.
+    """
+
+    people_collection_ref = db.collection("people")
+
+    query = people_collection_ref.where(field_name, operator, field_value)
+    streamed_query = stream(query)
+    if streamed_query == ERROR:
+        #TODO: raise Custom Exception (DN-932: https://dealroom.atlassian.net/browse/DN-932)
+        logging.error("Couldn't stream query.")
+        return ERROR
+
+    matching_docs = [doc_ref for doc_ref in streamed_query]
+
+    num_matching_docs = len(matching_docs)
+    if num_matching_docs == 0:
+        return None
+
+    return matching_doc
