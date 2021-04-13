@@ -375,7 +375,7 @@ def set_history_doc_refs(
 
     if history_refs == ERROR:
         return ERROR
-    if "dealroom_id" in history_refs:
+    if "dealroom_id" in history_refs and len(history_refs["dealroom_id"]) > 0:
         count_history_refs = len(history_refs["dealroom_id"])
         key_found = "dealroom_id"
     elif "dealroom_id_old" in history_refs:
@@ -389,6 +389,9 @@ def set_history_doc_refs(
     elif "current_related_urls" in history_refs and len(history_refs["current_related_urls"]) > 0:
         count_history_refs = len(history_refs["current_related_urls"])
         key_found = "current_related_urls"
+    elif "dealroom_id_old" in history_refs and len(history_refs["dealroom_id_old"]) > 0:
+        count_history_refs = len(history_refs["dealroom_id_old"])
+        key_found = "dealroom_id_old"
     else:
         count_history_refs = 0
     # CREATE: If there are not available documents in history
