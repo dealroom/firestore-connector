@@ -375,14 +375,12 @@ def set_history_doc_refs(
 
     if history_refs == ERROR:
         return ERROR
-    if "dealroom_id" in history_refs:
+    if "dealroom_id" in history_refs and len(history_refs["dealroom_id"]) > 0:
         count_history_refs = len(history_refs["dealroom_id"])
         key_found = "dealroom_id"
-    elif "dealroom_id_old" in history_refs:
-        # we found a matching document but we're trying to update an entity that was removed
-        #TODO: raise a Custom Exception (DeletedEntityException)
-        logging.error("Trying to update a deleted entity.")
-        return ERROR
+    elif "dealroom_id_old" in history_refs and len(history_refs["dealroom_id_old"]) > 0:
+        count_history_refs = len(history_refs["dealroom_id_old"])
+        key_found = "dealroom_id_old"
     elif "final_url" in history_refs and len(history_refs["final_url"]) > 0:
         count_history_refs = len(history_refs["final_url"])
         key_found = "final_url"
