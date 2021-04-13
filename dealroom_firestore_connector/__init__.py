@@ -507,3 +507,77 @@ def get_people_doc_refs(
         return None
 
     return matching_doc
+
+def _validate_new_people_doc_payload(payload: dict):
+    """Validate the required fields in the payload when creating a new document in the people collection"""
+
+    if "dealroom_id" not in payload:
+        raise KeyError("'dealroom_id' must be present payload")
+
+    _validate_dealroomid(payload["dealroom_id"])
+
+def set_people_doc_ref(
+    db: firestore.Client,
+    field_name: str,
+    operator: str,
+    field_value,
+    payload: dict,
+):
+    """Updates or Creates a single document from 'people' collection with 'payload' where 'field_name' has 'operator'
+    relation with 'field_value'.
+
+    Args:
+        field_name (str): the field to query for.
+        operator (str): determines the condition for matching ('==', ...).
+        field_value (Any): the value that satisfies the condition.
+        payload (dict): The actual data that the newly created document will have OR the fields to update.
+
+    Returns:
+        [DocumentReference]: if no documents are found, return None, else a list of matching documents.
+    """
+    people_collection_ref = db.collection("people")
+
+    _payload = {**payload}
+
+    people_refs = get_people_doc_refs(db, field_value, operator, field_value) if field_name and operator and field_value else []
+    matching_docs = len(people_refs)
+
+    # CREATE: If there are not mayching documents in people
+    if matching_docs == 0:
+        # Add any default values to the payload
+        _payload["dealroom_id"] = _NOT_IN_DEALROOM_ENTITY_ID
+
+        # Validate that the new document will have the minimum required fields
+        try:
+            _validate_new_people_doc_payload(_payload)
+        except (ValueError, KeyError) as ex:
+            #TODO: raise Custom Exception (DN-932: https://dealroom.atlassian.net/browse/DN-932)
+            logging.error(ex)
+            return ERROR
+        people_doc_ref = people_collection_ref.document()
+        operation_status_code = CREATED
+    # UPDATE:
+    elif matching_docs == 1:
+         # Ensure that dealroom_id is type of number if it appears on the payload
+        if "dealroom_id" in _payload:
+            _validate_dealroomid(_payload["dealroom_id"])
+        people_doc_ref = people_refs[0]
+        operation_status_code = UPDATED
+    # If more than one document were found then it's an error.
+    else:
+        # TODO: Raise a Custom Exception (DuplicateDocumentsException) with the same message when we replace ERROR constant with actual exceptions
+        #   (DN-932: https://dealroom.atlassian.net/browse/DN-932)
+        logging.error("Found more than one documents to update for this payload")
+        return ERROR
+
+    res = set(people_doc_ref, _payload)
+
+    if res == ERROR:
+        # TODO: Raise a Custom Exception (FirestoreException) with the same message when we replace ERROR constant with actual exceptions
+        #   (DN-932: https://dealroom.atlassian.net/browse/DN-932)
+        logging.error(
+            f"Couldn't `set` document {finalurl_or_dealroomid}. Please check logs above."
+        )
+        return ERROR
+
+    return operation_status_code
